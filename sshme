@@ -1,9 +1,11 @@
+#! /usr/bin/env python3
+
 import subprocess
 import sys
 import os
 import json
 import pyperclip
-from PyQt5.QtWidgets import QApplication, QWidget, QComboBox, QVBoxLayout, QHBoxLayout,  QLineEdit, QPushButton, \
+from PyQt5.QtWidgets import QApplication, QWidget, QComboBox, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, \
     QListWidget, QMessageBox, QDialog, QFormLayout, QDialogButtonBox, QFileDialog, QSystemTrayIcon, QMenu
 from PyQt5.QtGui import QIcon, QCursor
 import shutil
