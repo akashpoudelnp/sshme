@@ -7,15 +7,50 @@ also allows you to connect to your SSH keys with a single command.
 
 ### Installation
 
-Run the following command to install SSHMe.
+Before you begin installation install the dependencies:
 
 ```bash
- sudo mkdir /usr/share/applications/sshme && sudo wget https://raw.githubusercontent.com/akashpoudelnp/sshme/main/sshme -O /usr/share/applications/sshme/sshme && sudo wget https://raw.githubusercontent.com/akashpoudelnp/sshme/main/sshme-logo.png -O /usr/share/applications/sshme/sshme-logo.png && sudo chmod +x /usr/share/applications/sshme/sshme && echo "[Desktop Entry] Name=SSHMe Comment=Manage your SSH keys Exec=/usr/share/applications/sshme/sshme Icon=/usr/share/applications/sshme/sshme-logo.png Terminal=false Type=Application Categories=Utility;Development;" | sudo tee /usr/share/applications/sshme.desktop
+sudo apt install python3-pyperclip python3-pystray python3-pyqt5
+```
+
+Then download the executable and logo and place it in same directory.
+
+For this example we will place the files in `~/.local/share/sshme` directory.
+
+```bash
+mkdir ~/.local/share/sshme
+cd ~/.local/share/sshme
+```
+
+Then we download the executable and logo inside the directory.
+
+```bash
+wget https://raw.githubusercontent.com/akashpoudelnp/sshme/main/sshme
+wget https://raw.githubusercontent.com/akashpoudelnp/sshme/main/sshme-logo.png
+```
+
+We make the executable file executable.
+
+```bash
+chmod +x sshme
+```
+
+Then we create a desktop entry for the application.
+
+```bash
+echo "[Desktop Entry]
+Name=SSHMe
+Exec=$HOME/.local/share/sshme/sshme
+Icon=$HOME/.local/share/sshme/sshme-logo.png
+Type=Application
+Categories=Utility;" > ~/.local/share/applications/sshme.desktop
 ```
 
 ### Usage
 
 Search for SSHMe in your application menu and click on it to open the SSHMe application.
+
+You can also add SSHMe to startup applications to run it on startup.
 
 ### Support
 
@@ -23,5 +58,4 @@ The current build of **sshme** was tested and ran on following systems:
 
 - Linux Mint 22.04
 - KDE Neon 6
-
-
+- Ubuntu 22.04
