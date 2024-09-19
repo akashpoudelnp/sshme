@@ -10,7 +10,7 @@ also allows you to connect to your SSH keys with a single command.
 Before you begin installation install the dependencies:
 
 ```bash
-sudo apt install python3-pyperclip python3-pystray python3-pyqt5
+sudo apt install python3-pyperclip python3-pystray python3-pyqt6
 ```
 
 Then download the executable and logo and place it in same directory.
