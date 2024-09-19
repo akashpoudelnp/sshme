@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/akashpoudelnp/sshme/main/sshme-logo.png">
+<img src="https://raw.githubusercontent.com/akashpoudelnp/sshme/main/logo.png">
 
 ### SSHMe
 
@@ -26,7 +26,7 @@ Then we download the executable and logo inside the directory.
 
 ```bash
 wget https://raw.githubusercontent.com/akashpoudelnp/sshme/main/sshme
-wget https://raw.githubusercontent.com/akashpoudelnp/sshme/main/sshme-logo.png
+wget https://raw.githubusercontent.com/akashpoudelnp/sshme/main/logo.png
 ```
 
 We make the executable file executable.
@@ -41,7 +41,7 @@ Then we create a desktop entry for the application.
 echo "[Desktop Entry]
 Name=SSHMe
 Exec=$HOME/.local/share/sshme/sshme
-Icon=$HOME/.local/share/sshme/sshme-logo.png
+Icon=$HOME/.local/share/sshme/logo.png
 Type=Application
 Categories=Utility;" > ~/.local/share/applications/sshme.desktop
 ```

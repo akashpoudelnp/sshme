@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+import datetime
 import json
 import os
 import shutil
@@ -8,19 +9,21 @@ import sys
 import pyperclip
 import pystray
 from PIL import Image
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QApplication, QWidget, QComboBox, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, \
-    QListWidget, QMessageBox, QDialog, QFormLayout, QDialogButtonBox, QFileDialog
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QApplication, QComboBox, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, \
+    QListWidget, QMessageBox, QDialog, QFormLayout, QDialogButtonBox, QFileDialog, QLabel
 
 # Get the current path of file
 current_path = os.path.dirname(os.path.realpath(__file__))
-logo_path = current_path + '/sshme-logo.png'
+logo_path = current_path + '/logo.png'
 
 
 class AddEditCredentialDialog(QDialog):
     def __init__(self, parent=None, credential=None):
         super().__init__(parent)
         self.setWindowTitle('Add/Edit Credential')
+        self.setWindowIcon(QIcon(logo_path))
+        self.setMinimumSize(600, 300)
 
         # Widgets
         self.alias_edit = QLineEdit()
@@ -30,7 +33,7 @@ class AddEditCredentialDialog(QDialog):
         self.keyfile_edit = QLineEdit()
         self.keyfile_button = QPushButton('Browse')
         self.password_edit = QLineEdit()
-        self.password_edit.setEchoMode(QLineEdit.Password)
+        self.password_edit.setEchoMode(QLineEdit.EchoMode.Password)
 
         # Layout
         layout = QFormLayout()
@@ -44,9 +47,11 @@ class AddEditCredentialDialog(QDialog):
         layout.addRow("Keyfile Path:", keyfile_layout)
         layout.addRow("Password:", self.password_edit)
 
-        self.buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+
         self.buttons.accepted.connect(self.accept)
         self.buttons.rejected.connect(self.reject)
+
         layout.addRow(self.buttons)
 
         self.setLayout(layout)
@@ -65,9 +70,9 @@ class AddEditCredentialDialog(QDialog):
 
     def browse_keyfile(self):
         file_dialog = QFileDialog()
-        file_dialog.setFileMode(QFileDialog.ExistingFile)
+        file_dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
         file_dialog.setNameFilter("All files (*.*)")
-        if file_dialog.exec_():
+        if file_dialog.exec():
             file_path = file_dialog.selectedFiles()[0]
             self.keyfile_edit.setText(file_path)
 
@@ -84,7 +89,12 @@ class AddEditCredentialDialog(QDialog):
 class ManageCredentialsDialog(QDialog):
     def __init__(self, credentials):
         super().__init__()
+
         self.setWindowTitle("Manage Credentials")
+        self.setWindowIcon(QIcon(logo_path))
+
+        self.setFixedSize(500, 400)
+
         self.credentials = credentials
 
         self.list_widget = QListWidget()
@@ -104,36 +114,6 @@ class ManageCredentialsDialog(QDialog):
         layout.addLayout(buttons_layout)
 
         # Style
-        self.setWindowIcon(QIcon(logo_path))
-        self.setFixedSize(400, 200)
-        self.setStyleSheet("""
-            QPushButton {
-                padding: 5px;
-                margin: 5px;
-            }
-            QLineEdit {
-                padding: 5px;
-                margin: 5px;
-            }
-            QComboBox {
-                padding: 5px;
-                margin: 5px;
-            }
-            QDialogButtonBox {
-                padding: 5px;
-                margin: 5px;
-            }
-            QDialog {
-                padding: 5px;
-                margin: 5px;
-            }
-            QFormLayout {
-                padding: 5px;
-                margin: 5px;
-            }
-            
-        """)
-
         self.setLayout(layout)
 
     def populate_list_widget(self):
@@ -147,7 +127,7 @@ class ManageCredentialsDialog(QDialog):
             selected_index = self.list_widget.row(selected_item)
             credential = self.credentials[selected_index]
             dialog = AddEditCredentialDialog(credential=credential)
-            if dialog.exec_():
+            if dialog.exec():
                 updated_credential = dialog.get_credential()
                 self.credentials[selected_index] = updated_credential
                 self.populate_list_widget()
@@ -176,49 +156,32 @@ class PreferencesDialog(QDialog):
             self.terminal_combo.setCurrentIndex(index)
 
         self.export_button = QPushButton('Export Credentials')
+        self.export_button.setToolTip('Export credentials to a JSON file')
+
         self.import_button = QPushButton('Import Credentials')
+        self.import_button.setToolTip('Import credentials from a JSON file')
 
         # Layout
         layout = QFormLayout()
         layout.addRow("Terminal:", self.terminal_combo)
+
+        layout.addWidget(QLabel())
+
         layout.addRow(self.export_button)
         layout.addRow(self.import_button)
 
-        self.buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+
         self.buttons.accepted.connect(self.accept)
         self.buttons.rejected.connect(self.reject)
+
+        layout.addWidget(QLabel())
+
         layout.addRow(self.buttons)
 
         # Style
         self.setWindowIcon(QIcon(logo_path))
         self.setFixedSize(400, 200)
-        self.setStyleSheet("""
-            QPushButton {
-                padding: 5px;
-                margin: 5px;
-            }
-            QLineEdit {
-                padding: 5px;
-                margin: 5px;
-            }
-            QComboBox {
-                padding: 5px;
-                margin: 5px;
-            }
-            QDialogButtonBox {
-                padding: 5px;
-                margin: 5px;
-            }
-            QDialog {
-                padding: 5px;
-                margin: 5px;
-            }
-            QFormLayout {
-                padding: 5px;
-                margin: 5px;
-            }
-            
-        """)
 
         self.setLayout(layout)
 
@@ -234,22 +197,29 @@ class PreferencesDialog(QDialog):
 
     def export_credentials(self):
         file_dialog = QFileDialog()
-        file_dialog.setAcceptMode(QFileDialog.AcceptSave)
+        file_dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
         file_dialog.setNameFilter("JSON files (*.json)")
-        if file_dialog.exec_():
+        file_dialog.setDefaultSuffix("json")
+        file_dialog.selectFile("credentials-" + str(datetime.date.today()) + ".json")
+
+        if file_dialog.exec():
             file_path = file_dialog.selectedFiles()[0]
             with open(file_path, 'w') as f:
                 json.dump(self.ssh_app.credentials, f, indent=4)
 
     def import_credentials(self):
         file_dialog = QFileDialog()
-        file_dialog.setFileMode(QFileDialog.ExistingFile)
+        file_dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
         file_dialog.setNameFilter("JSON files (*.json)")
-        if file_dialog.exec_():
+        if file_dialog.exec():
             file_path = file_dialog.selectedFiles()[0]
             with open(file_path, 'r') as f:
                 self.ssh_app.credentials = json.load(f)
             self.ssh_app.save_credentials()
+
+            # Refresh the menu
+            self.ssh_app.menu = pystray.Menu(*self.ssh_app.create_menu_items())
+            self.ssh_app.update_menu()
 
 
 class SSHCredentialsApp(pystray.Icon):
@@ -281,21 +251,51 @@ class SSHCredentialsApp(pystray.Icon):
 
     def open_preferences(self):
         dialog = PreferencesDialog(self)
-        dialog.exec_()
+        dialog.exec()
 
     def manage_credentials(self):
         dialog = ManageCredentialsDialog(self.credentials)
-        dialog.exec_()
+        dialog.exec()
         self.save_credentials()
 
     def about(self):
-        widget = QWidget()
-        QMessageBox.about(widget, "About SSH Credentials Manager",
-                          "SSH Credentials Manager\n\n"
-                          "A simple system tray application for managing SSH credentials.\n\n"
-                          "Developed by: Aakash Poudel\n"
-                          "GitHub: https://github.com/akashpoudelnp/sshme\n"
-                          "License: MIT")
+        layout = QVBoxLayout()
+
+        logo = QLabel()
+        logo.setPixmap(QIcon(logo_path).pixmap(128, 128))
+        layout.addWidget(logo)
+
+        title = QLabel("SSH Credentials Manager")
+        title.setStyleSheet("font-size: 20px; font-weight: bold;")
+        layout.addWidget(title)
+
+        description = QLabel("A simple system tray application for managing SSH credentials.")
+        layout.addWidget(description)
+
+        layout.addWidget(QLabel())
+
+        developer = QLabel("Developed by <b>Aakash Poudel</b>")
+        layout.addWidget(developer)
+
+        layout.addWidget(QLabel())
+
+        github = QLabel("<a href='https://github.com/akashpoudelnp/sshme'>GitHub</a>")
+        github.setOpenExternalLinks(True)
+        layout.addWidget(github)
+
+        website = QLabel("<a href='https://akashpoudel.com.np'>Website</a>")
+        website.setOpenExternalLinks(True)
+        layout.addWidget(website)
+
+        layout.addWidget(QLabel())
+
+        dialog = QDialog()
+
+        dialog.setWindowTitle("About")
+        dialog.setWindowIcon(QIcon(logo_path))
+        dialog.setLayout(layout)
+
+        dialog.exec()
 
     def quit(self):
         self.stop()
@@ -305,7 +305,7 @@ class SSHCredentialsApp(pystray.Icon):
 
     def add_credential(self):
         dialog = AddEditCredentialDialog()
-        if dialog.exec_():
+        if dialog.exec():
             new_credential = dialog.get_credential()
             self.credentials.append(new_credential)
             self.save_credentials()
@@ -360,7 +360,6 @@ class SSHCredentialsApp(pystray.Icon):
             json.dump(self.preferences, f, indent=4)
 
     def load_credentials(self):
-        # Load credentials from config directory
         config_dir = os.path.join(os.path.expanduser('~'), '.ssh_credentials_manager')
         os.makedirs(config_dir, exist_ok=True)
         config_file = os.path.join(config_dir, 'credentials.json')
